@@ -2,20 +2,14 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    /**
-     * Add altering commands here.
-     *
-     * Example:
-     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-     */
+
+    await queryInterface.addColumn('livros', 'sigla_pais', { 
+      type: Sequelize.DataTypes.STRING(10),
+    });
+
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    await queryInterface.removeColumn('livros', 'sigla_pais');
   }
 };

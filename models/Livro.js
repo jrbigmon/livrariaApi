@@ -30,6 +30,11 @@ module.exports = (connection, DataTypes) => {
         estoque: {
             type: DataTypes.INTEGER,
             allowNull: false
+        },
+
+        siglaPais: {
+            type: DataTypes.STRING(10),
+            field: 'sigla_pais'
         }
     }, {
         tableName: "livros",

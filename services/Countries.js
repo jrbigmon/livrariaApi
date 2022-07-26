@@ -9,14 +9,11 @@ const methods = {
         try {
             const response = await countriesApi.get(`alpha/${code}`);
 
-            if(response.status !== 200){
-                throw new Error("A requisição falhou!");
-            }
-
             return response.data;
 
         } catch (err){
-            console.log(err);
+            err.message = new Error("Código do pais não econtrado!")
+            console.log(err.message)
         }
     }
 }

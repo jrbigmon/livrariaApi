@@ -3,6 +3,30 @@ const { Op } = require('sequelize');
 const countriesApi = require('../services/Countries');
 
 const livroV1Controller = {
+    listBooksFromCountry: async (req, res) =>{
+        try {
+            const { code } = req.params;
+
+            const books = await Livro.findAll({
+                where: { siglaPais: code } 
+            });
+
+            if(books.length > 0){
+                const pais = await countriesApi.getByAlphaCode(code)
+                const flag = pais[0].flags.png
+                console.log(flag)
+                return res.status(200).json({flag, books})
+            }
+
+            return res.status(404).json("Não há livros desse país!")
+        } 
+        catch(err) {
+            new Error(err.message = "Servidor indisponível!");
+            return res.status(500).json(err.message)
+        }
+        
+    },
+
     listAllBooks: async (req, res) => {
         try {
             const books = await Livro.findAll();
@@ -16,24 +40,30 @@ const livroV1Controller = {
 
     listOneBook: async (req, res) => {
         try {
-            let book = await Livro.findByPk(req.params.id, {raw: true});
+            const { id } = req.params
 
-            const pais = await countriesApi.getByAlphaCode('br');
-
-            Object.assign(book,{
-                flag: pais[0].flags.png
-            });
-
+            let book = await Livro.findByPk(id);
+    
             if(book){
+                if(book.siglaPais){
+                    const pais = await countriesApi.getByAlphaCode(book.siglaPais);
+
+                    Object.assign(book,{
+                        flag: pais[0].flags.png
+                    });
+
+                } else {
+                    delete book.siglaPais;
+                }
+
                 return res.status(200).json(book);
             }
 
-            return res.status(404).json('Filme não encontrado!')
+            return res.status(404).json("Livro não encontrado!")
         }
         catch (err) {
-           new Error(err.message = 'Servidor indisponível');
-
-           return res.status(500).json(err.message);
+            new Error(err.message = "Servidor indisponível!")
+            return res.status(500).json(err.message)
         }
     },
 
@@ -44,7 +74,8 @@ const livroV1Controller = {
                 quantidade_paginas,
                 autor,
                 ano_lancamento,
-                estoque
+                estoque,
+                siglaPais
             } = req.body;
 
             let book = {
@@ -52,7 +83,8 @@ const livroV1Controller = {
                 quantidade_paginas,
                 autor,
                 ano_lancamento,
-                estoque
+                estoque,
+                siglaPais: siglaPais.toLowerCase()
             }
             const verifyBookExists = await Livro.findOne({
                 where: {
@@ -84,9 +116,10 @@ const livroV1Controller = {
 
     deleteBook: async (req, res) => {
         try {
-            let book = await Livro.findByPk(req.params.id)
+            const { id } = req.params
+            let book = await Livro.findByPk(id)
             if(book){
-                await Livro.destroy({ where: { id: req.params.id } })
+                await Livro.destroy({ where: { id } })
                 return res.status(204).json()
             } else {
                 return res.status(404).json('Livro não encontrado!')
@@ -106,14 +139,38 @@ const livroV1Controller = {
 
             const bookOld = await Livro.findByPk(id);
 
-            const {titulo, quantidade_paginas, autor, ano_lancamento, estoque} = req.body;
+            const {
+                titulo,
+                quantidade_paginas,
+                autor,
+                ano_lancamento,
+                estoque,
+                siglaPais
+            } = req.body;
 
-            const bookUpdated = {titulo, quantidade_paginas, autor, ano_lancamento, estoque}
+            const bookUpdated = {
+                titulo,
+                quantidade_paginas,
+                autor,
+                ano_lancamento,
+                estoque,
+                siglaPais: siglaPais.toLowerCase()
+            }
 
             if(bookOld){
-                await Livro.update(bookUpdated, { where: {id} })
-                return res.status(201).json(bookUpdated);
+                const verifyBookExists = await Livro.findOne({
+                    where: {
+                        [Op.and]: [{titulo: bookUpdated.titulo}, {autor: bookUpdated.autor}]
+                    }
+                });
+    
+                if(verifyBookExists){
+                    return res.status(422).json('Livro já cadastrado')
+                }
 
+                await Livro.update(bookUpdated, { where: {id} });
+
+                return res.status(201).json(bookUpdated);
             } 
 
             return res.status(404).json('Livro não encontrado!');
