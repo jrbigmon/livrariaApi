@@ -12,9 +12,10 @@ module.exports = (connection, DataTypes) => {
             allowNull: false
         },
 
-        quantidade_paginas: {
+        quantidadePaginas: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            field: 'quantidade_paginas'
         },
 
         autor: {
@@ -22,9 +23,10 @@ module.exports = (connection, DataTypes) => {
             allowNull: false
         },
 
-        ano_lancamento: {
+        anoLancamento: {
             type: DataTypes.STRING(50),
-            allowNull: false
+            allowNull: false,
+            field: 'ano_lancamento'
         },
 
         estoque: {
