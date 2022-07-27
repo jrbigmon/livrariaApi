@@ -39,6 +39,10 @@ The stacks used were:
 ### insert the books in the table:
 - npx sequelize db:seed:all
 
+### initialize the project with:
+- npm run dev (for devs)
+- npm start (for production)
+
 ## <h2 align="center"> using the API </h2>
 
 ### GET
