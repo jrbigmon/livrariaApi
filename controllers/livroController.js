@@ -12,17 +12,18 @@ const livroV1Controller = {
             });
 
             if(books.length > 0){
-                const pais = await countriesApi.getByAlphaCode(code)
-                const flag = pais[0].flags.png
-                console.log(flag)
+                const pais = await countriesApi.getByAlphaCode(code);
+
+                const flag = pais[0].flags.png;
+
                 return res.status(200).json({flag, books})
             }
 
-            return res.status(404).json("Não há livros desse país!")
+            return res.status(404).json("Não há livros desse país!");
         } 
         catch(err) {
             new Error(err.message = "Servidor indisponível!");
-            return res.status(500).json(err.message)
+            return res.status(500).json(err.message);
         }
         
     },
@@ -42,7 +43,7 @@ const livroV1Controller = {
         try {
             const { id } = req.params
 
-            let book = await Livro.findByPk(id);
+            let book = await Livro.findByPk(id, {raw: true});
     
             if(book){
                 if(book.siglaPais){
